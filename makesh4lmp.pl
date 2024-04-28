@@ -58,7 +58,7 @@ node=1
 threads=1
 processors=\$(nproc)
 np=\$((\$node*\$processors/\$threads))
-export OMP_NUM_THREADS=\$np
+export OMP_NUM_THREADS=\$threads
 export TF_INTRA_OP_PARALLELISM_THREADS=\$np
 export TF_INTER_OP_PARALLELISM_THREADS=\$threads
 #The following are used only for intel MKL (not workable for AMD)
