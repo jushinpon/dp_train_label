@@ -32,7 +32,7 @@ my $out_freq = 1000;#dlp md.out frequency (not two small, otherwise very similar
 ###minimize set
 
 my $PotentialPath = "$mainPath/dp_train_new/dp_train";
-my @pb_files = `find $PotentialPath -type f -name "*.pb"|grep -v compress`;#all npy files
+my @pb_files = `find $PotentialPath -type f -name "*.pb"|grep compress`;#all npy files
 map { s/^\s+|\s+$//g; } @pb_files;
 die "No DLP pb files \n" unless (@pb_files);
 my $Potential_pb = join (" ",@pb_files);
