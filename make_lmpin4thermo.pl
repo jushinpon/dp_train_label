@@ -28,7 +28,7 @@ my $run_step = 600000;
 my $timestep = 0.001;
 my $tdamp = $timestep*100;
 my $pdamp = $timestep*1000;
-my $out_freq = 1000;#dlp md.out frequency (not two small, otherwise very similar structures will be labelled.)
+my $out_freq = ceil($run_step/100);#dlp md.out frequency (not too small, otherwise very similar structures will be labelled.)
 ###minimize set
 
 my $PotentialPath = "$mainPath/dp_train_new/dp_train";
