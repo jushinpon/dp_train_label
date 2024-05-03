@@ -30,10 +30,11 @@ my @all_subfolders = `find $sour_folder -maxdepth 1 -mindepth 1 -type d -name "*
 map { s/^\s+|\s+$//g; } @all_subfolders;
 my $sub_No = @all_subfolders;
 my $ng_count = 0;
+`rm -f $sour_folder/nolabel.dat`;
 `touch $sour_folder/nolabel.dat`;
 for my $n (@all_subfolders){#loop over folders with no labelled sub folder
     unless (-e "$n/md.out"){
-        print "no md.out in $n. Skipped!\n";
+        #print "no md.out in $n. Skipped!\n";
        `echo "no md.out in $n" >> $sour_folder/nolabel.dat`;
        $ng_count++;
         next; 
