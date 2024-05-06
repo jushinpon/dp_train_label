@@ -20,7 +20,7 @@ chdir("$currentPath");
 ###settings here!
 my $max4relabel = 20;# how many cfgs you want to use in labelled folder
 my $lowerbound = 0.05;#below which not lebelled
-my $upperbound = 0.25;#above which not lebelled
+my $upperbound = 0.20;#above which not lebelled
 my $sour_folder = "$currentPath/thermo_label";
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
@@ -74,6 +74,16 @@ for my $n (@all_subfolders){#loop over folders with no labelled sub folder
     }
 }
 
+my @all_labelled = `find $sour_folder/*/labelled -maxdepth 1 -mindepth 1 -type f -name "*.cfg"`;
+map { s/^\s+|\s+$//g; } @all_labelled;
+my $labelNo = @all_labelled;
+
+print "Total labelled cfg Number: $labelNo\n";
+print "If the above number is too large for SCF, you can reduce \$upperbound to 0.20 or 0.18...\n";
+#for (@all_labelled){
+#    print "$_\n";
+#}
+#die;
 `echo " " >> $sour_folder/nolabel.dat`;
 `echo "### label process summary:" >> $sour_folder/nolabel.dat`;
 `echo "folders without labelled subfolder/total folders => $ng_count/$sub_No" >> $sour_folder/nolabel.dat`;
