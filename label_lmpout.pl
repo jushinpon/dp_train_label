@@ -5,7 +5,7 @@ use warnings;
 use strict;
 use JSON::PP;
 use Data::Dumper;
-use List::Util qw(min max any);
+use List::Util qw(min max any shuffle);
 use Cwd;
 use POSIX;
 use Parallel::ForkManager;
@@ -18,9 +18,9 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 ###settings here!
-my $max4relabel = 20;# how many cfgs you want to use in labelled folder
+my $max4relabel = 10;# how many cfgs you want to use in labelled folder
 my $lowerbound = 0.05;#below which not lebelled
-my $upperbound = 0.20;#above which not lebelled
+my $upperbound = 0.25;#above which not lebelled
 my $sour_folder = "$currentPath/thermo_label";
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
@@ -42,6 +42,9 @@ for my $n (@all_subfolders){#loop over folders with no labelled sub folder
     #  step   max_devi_v   min_devi_v   avg_devi_v   max_devi_f  min_devi_f         avg_devi_f
     my @maxf = `grep -v '^[[:space:]]*\$' $n/md.out | grep -v step|awk '{print \$5}'`;
     map { s/^\s+|\s+$//g; } @maxf;
+    my @step_maxf1 = `grep -v '^[[:space:]]*\$' $n/md.out | grep -v step|awk '{print \$1 " " \$5}'`;
+    map { s/^\s+|\s+$//g; } @step_maxf1;
+    my @step_maxf = shuffle @step_maxf1;
     unless (@maxf){#
         print "No max force deviation in $n\n";
        `echo "No max force deviation in $n" >> $sour_folder/nolabel.dat`;
@@ -56,19 +59,23 @@ for my $n (@all_subfolders){#loop over folders with no labelled sub folder
         $ng_count++;
         next; 
     }
-    my @step = `grep -v '^[[:space:]]*\$' $n/md.out | grep -v step|awk '{print \$1}'`;
-    map { s/^\s+|\s+$//g; } @step;        
+
+    #my @step = `grep -v '^[[:space:]]*\$' $n/md.out | grep -v step|awk '{print \$1}'`;
+    #map { s/^\s+|\s+$//g; } @step;        
     #my @maxsort = sort {$a <=> $b} @maxf;
    # my $max4relabel
     `rm -rf $n/labelled`;
     `mkdir $n/labelled`;
     ####begin relabelling
     my $counter = 0;
-    for my $m (0..$#maxf){#original sequence
-           # print "## $m: $tempf\n";
-        if(any { $_ == $maxf[$m] } @force_dev and $counter < $max4relabel){    
+    for my $m (0..$#step_maxf){#original sequence
+    #for my $m (0..$#maxf){#original sequence
+            #print "## $m: $step_maxf[$m]\n";
+        my @temp = split(/\s+/,$step_maxf[$m]);
+        #if(any { $_ == $maxf[$m] } @force_dev){    
+        if(any { $_ == $temp[1] } @force_dev and $counter < $max4relabel){    
            $counter++;
-           my $lmpfile = "lmp_$step[$m].cfg";
+           my $lmpfile = "lmp_$temp[0].cfg";
            `cp $n/lmp_output/$lmpfile $n/labelled/$lmpfile`
         }
     }
