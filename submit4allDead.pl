@@ -9,12 +9,11 @@ use Cwd;
 use POSIX;
 
 my $currentPath = getcwd();# dir for all scripts
-my @allQEin = `grep -v '^[[:space:]]*\$' $currentPath/QEjobs_status/Dead.txt| grep -v '#'|awk '{print \$2}'`;#all dead QE cases
+my @allQEin = `grep -v '^[[:space:]]*\$' $currentPath/QEjobs_status/Dead.txt| grep -v '#'`;#all dead QE cases
 map { s/^\s+|\s+$//g; } @allQEin;
 
 for my $i (@allQEin){
     #print "\$i: $i\n";
-
     my $dirname = `dirname $i`;
     $dirname =~ s/^\s+|\s+$//g;
     chdir($dirname);
