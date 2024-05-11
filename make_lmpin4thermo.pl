@@ -154,7 +154,7 @@ velocity all scale $lmp_hr->{temperatur_initial}
 if " \${ensemble} == 0 " then &
 "fix 1 all nvt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp}" &
 else &
-"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} aniso $lmp_hr->{press} $lmp_hr->{press} $lmp_hr->{pdamp}"
+"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} aniso $lmp_hr->{press} $lmp_hr->{press} $lmp_hr->{pdamp} xy 0.0 0.0 $lmp_hr->{pdamp} xz 0.0 0.0 $lmp_hr->{pdamp} yz 0.0 0.0 $lmp_hr->{pdamp} couple none"
 
 thermo 100
 thermo_style custom step temp density pxx pyy pzz press pe

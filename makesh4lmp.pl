@@ -51,11 +51,12 @@ my $here_doc =<<"END_MESSAGE";
 #SBATCH --job-name=label_$basename
 #SBATCH --nodes=$sbatch_para{nodes}
 #SBATCH --partition=$sbatch_para{partition}
+hostname
 rm -rf *.cfg
 rm -rf *.data
 rm -rf lmp_output
 node=1
-threads=1
+threads=2
 processors=\$(nproc)
 np=\$((\$node*\$processors/\$threads))
 export OMP_NUM_THREADS=\$threads
