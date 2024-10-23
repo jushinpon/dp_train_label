@@ -30,7 +30,7 @@ my %sbatch_para = (
             nodes => 1,#how many nodes for your qe job
             threads => '$(nproc)',#1,#modify it to 2, 4 if oom problem appears            
             partition => "All",#which partition you want to use
-            runPath => "/opt/thermoPW-7-2/bin/pw.x", #qe executable          
+            runPath => "/opt/thermoPW-7-2_intel/bin/pw.x", #qe executable          
             );
 #my $onlyCheckcfgNumber = "no";#only check how many labelled cfg files, then decide how 
 #many you want to use for DFT,
@@ -65,18 +65,20 @@ my $here_doc =<<"END_MESSAGE";
 ##SBATCH --ntasks-per-node=12
 ##SBATCH --exclude=node23
 hostname
-source /opt/intel/oneapi/setvars.sh
+#source /opt/intel/oneapi/setvars.sh
 rm -rf pwscf*
 node=$sbatch_para{nodes}
 threads=$sbatch_para{threads}
 processors=\$(nproc)
 np=\$((\$node*\$processors/\$threads))
-
 export OMP_NUM_THREADS=\$threads
 #the following two are for AMD CPU if slurm chooses for you!!
 export MKL_DEBUG_CPU_TYPE=5
 export MKL_CBWR=AUTO
-mpiexec -np \$np $sbatch_para{runPath} -in $basename.in
+export LD_LIBRARY_PATH=/opt/mpich-4.0.3/lib:/opt/intel/oneapi/mkl/latest/lib:\$LD_LIBRARY_PATH
+export PATH=/opt/mpich-4.0.3/bin:\$PATH
+
+/opt/mpich-4.0.3/bin/mpiexec -np \$np $sbatch_para{runPath} -in $basename.in
 rm -rf pwscf*
 perl /opt/qe_perl/QEout_analysis.pl
 perl /opt/qe_perl/QEout2data.pl
