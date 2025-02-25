@@ -24,8 +24,10 @@ my %sbatch_para = (
             nodes => 1,#how many nodes for your lmp job
            # ntasks_per_node => 24,
             partition => "All",#which partition you want to use
-            LAMMPSPath => "/opt/lammps-mpich-4.0.3/lmpdeepmd", #lmp executable          
-            mpiPath => "/opt/mpich-4.0.3/bin/mpiexec" #mpipath          
+            LAMMPSPath => "lmp", #lmp executable          
+            #LAMMPSPath => "/opt/lammps-mpich-4.0.3/lmpdeepmd", #lmp executable          
+            mpiPath => "mpiexec" #mpipath          
+            #mpiPath => "/opt/mpich-4.0.3/bin/mpiexec" #mpipath          
             );
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
@@ -55,23 +57,29 @@ hostname
 rm -rf *.cfg
 rm -rf *.data
 rm -rf lmp_output
+
+if [ -f /opt/anaconda3/bin/activate ]; then
+    
+    source /opt/anaconda3/bin/activate deepmd-cpu-v3
+    export LD_LIBRARY_PATH=/opt/deepmd-cpu-v3/lib:/opt/deepmd-cpu-v3/lib/deepmd_lmp:\$LD_LIBRARY_PATH
+    export PATH=/opt/deepmd-cpu-v3/bin:\$PATH
+
+elif [ -f /opt/miniconda3/bin/activate ]; then
+    source /opt/miniconda3/bin/activate deepmd-cpu-v3
+    export LD_LIBRARY_PATH=/opt/deepmd-cpu-v3/lib:/opt/deepmd-cpu-v3/lib/deepmd_lmp:\$LD_LIBRARY_PATH
+    export PATH=/opt/deepmd-cpu-v3/bin:\$PATH
+else
+    echo "Error: Neither /opt/anaconda3/bin/activate nor /opt/miniconda3/bin/activate found."
+    exit 1  # Exit the script if neither exists
+fi
+
 node=1
-threads=2
+threads=\$(nproc)
 processors=\$(nproc)
 np=\$((\$node*\$processors/\$threads))
-export OMP_NUM_THREADS=\$threads
-export TF_INTRA_OP_PARALLELISM_THREADS=\$np
-export TF_INTER_OP_PARALLELISM_THREADS=\$threads
-#The following are used only for intel MKL (not workable for AMD)
-export KMP_AFFINITY=granularity=fine,compact,1,0
-export KMP_BLOCKTIME=0
-export KMP_SETTINGS=TRUE
 
-
-export LD_LIBRARY_PATH=/opt/mpich-4.0.3/lib:\$LD_LIBRARY_PATH
-export PATH=/opt/mpich-4.0.3/bin:\$PATH
-export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2018.0.128/linux/mkl/lib/intel64_lin:\$LD_LIBRARY_PATH
-
+export OMP_NUM_THREADS=\$processors
+export TF_INTRA_OP_PARALLELISM_THREADS=\$processors
 $sbatch_para{mpiPath} -np \$np $sbatch_para{LAMMPSPath} -in $basename.in
 
 END_MESSAGE
