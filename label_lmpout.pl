@@ -18,7 +18,7 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 ###settings here!
-my $max4relabel = 10;# how many cfgs you want to use in labelled folder
+my $max4relabel = 30;# how many cfgs you want to use in labelled folder
 my $lowerbound = 0.05;#below which not lebelled
 my $upperbound = 0.25;#above which not lebelled
 my $sour_folder = "$currentPath/thermo_label";
@@ -44,7 +44,8 @@ for my $n (@all_subfolders){#loop over folders with no labelled sub folder
     map { s/^\s+|\s+$//g; } @maxf;
     my @step_maxf1 = `grep -v '^[[:space:]]*\$' $n/md.out | grep -v step|awk '{print \$1 " " \$5}'`;
     map { s/^\s+|\s+$//g; } @step_maxf1;
-    my @step_maxf = shuffle @step_maxf1;
+    my @step_maxf = @step_maxf1;
+    #my @step_maxf = shuffle @step_maxf1;
     unless (@maxf){#
         print "No max force deviation in $n\n";
        `echo "No max force deviation in $n" >> $sour_folder/nolabel.dat`;

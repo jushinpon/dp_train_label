@@ -58,9 +58,9 @@ for my $cfg (@pathOfAllcfgs){
     #print "\$basename,\$dirname,\$folder: $basename,$dirname\n";
     #print "No $counter: $cfg\n";
     #find reference QE input in /initial folder
-    $cfg =~ m#.+/(.+T\d+-P\d+)-lmp.+/labelled/lmp_\d+.cfg#;    
-    #print "\$1: $1\n";
-
+    $cfg =~ m#.+/(.+T\d+(-P\d+)?)-lmp.+/labelled/lmp_\d+.cfg#;    
+#    print "\$1: $1, $cfg\n";
+#die;
     my @qein = `grep -v '^[[:space:]]*\$' $QEin_template_dir/$1/$1.in`;
     die "no qe input for $QEin_template_dir/$1/$1.in\n" unless(@qein);
     map { s/^\s+|\s+$//g; } @qein;

@@ -20,6 +20,7 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 ########## source folder you need to assign
+#my $sou_dir = "$currentPath/thermo_label/C_AlPNT-T0260-lmpT50to1250-P0-R500000/labelled";#source dir with labelled subfolders
 my $sou_dir = "$currentPath/thermo_label/*/labelled";#source dir with labelled subfolders
 
 
@@ -38,14 +39,15 @@ my %sbatch_para = (
 #my $maxDFTfiles = 30;
 
 #you may use relabel script to increase more labelled folders if needed
-my @oldsh = `find $sou_dir -type f -name "*.sh" -exec readlink -f {} \\;|sort`;
+my @oldsh = `find $sou_dir -type f -name "*.sh" -exec readlink -f {} \\;|sort|grep -v "C_AlPNT-T0260-lmpT50to1250-P0-R500000"`;
 for my $i (@oldsh){`rm -f $i`;}
 
-my @oldsout = `find $sou_dir -type f -name "*.sout" -exec readlink -f {} \\;|sort`;
+my @oldsout = `find $sou_dir -type f -name "*.sout" -exec readlink -f {} \\;|sort|grep -v "C_AlPNT-T0260-lmpT50to1250-P0-R500000"`;
 for my $i (@oldsout){`rm -f $i`;}
 
-my @allQEin = `find $sou_dir -type f -name "*.in" -exec readlink -f {} \\;|sort`;
+my @allQEin = `find $sou_dir -type f -name "*.in" -exec readlink -f {} \\;|sort|grep -v "C_AlPNT-T0260-lmpT50to1250-P0-R500000"`;
 map { s/^\s+|\s+$//g; } @allQEin;
+print "***all QE input Number: ",scalar @allQEin,"\n";
 #my @pathOfAllcfgs;
 my $jobNo = 0;
 for my $i (@allQEin){
@@ -64,6 +66,7 @@ my $here_doc =<<"END_MESSAGE";
 #SBATCH --partition=$sbatch_para{partition}
 ##SBATCH --ntasks-per-node=12
 ##SBATCH --exclude=node23
+##SBATCH --nodelist=master
 hostname
 #source /opt/intel/oneapi/setvars.sh
 rm -rf pwscf*
@@ -85,7 +88,7 @@ perl /opt/qe_perl/QEout2data.pl
 
 END_MESSAGE
     #chomp $here_doc;
-    #print "$here_doc";
+    print "writing $dirname/$basename.sh\n";
     open(FH, "> $dirname/$basename.sh") or die $!;
     print FH $here_doc;
     close(FH);       
