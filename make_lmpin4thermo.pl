@@ -17,14 +17,14 @@ chdir("..");
 my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
-my @datafile = `find $currentPath/data4thermo -name "*.data"|grep -v 2d`;#find all data files
+my @datafile = `find $currentPath/data4thermo -name "*.data"`;#find all data files
 map { s/^\s+|\s+$//g; } @datafile;
 
 #recommend 1. 10 to 1210 
-my $temperatur_initial = 50;
-my $temperatur_end = 1250;
+my $temperatur_initial = 1.0;
+my $temperatur_end = 1200;
 my @pressure = ("0");#10000 in lammps for 1 Gpa
-my $run_step = 500000;
+my $run_step = 1000000;
 my $timestep = 0.001;
 my $tdamp = $timestep*100;
 my $pdamp = $timestep*1000;
@@ -32,14 +32,14 @@ my $out_freq = ceil($run_step/500);#dlp md.out frequency (not too small, otherwi
 ###minimize set
 
 my $PotentialPath = "$mainPath/dp_train_new/dp_train";
-my @pb_files = `find $PotentialPath -type f -name "*.pb"|grep compress`;#all npy files
+my @pb_files = `find $PotentialPath -type f -name "*.pb"|grep compress|grep -v -- "-p"`;#all npy files
 map { s/^\s+|\s+$//g; } @pb_files;
 die "No DLP pb files \n" unless (@pb_files);
 my $Potential_pb = join (" ",@pb_files);
 
 my $Potential_prod="$Potential_pb out_file md.out out_freq $out_freq";
 #for surface $box_relax,should be modified
-my $box_relax = "z 0.0";#"x 200 y 200 z 200";#"aniso 0.0"; # a little compressed to get some compressed structures
+my $box_relax = "aniso 0.0";#"x 200 y 200 z 200";#"aniso 0.0"; # a little compressed to get some compressed structures
 #my $box_relax = "iso 50.0 xy 0.0 xz 0.0 yz 0.0";#"x 200 y 200 z 200";#"aniso 0.0"; # a little compressed to get some compressed structures
 my $min_value = "0.0 0.0 10000 20000"; #etol ftol maxiter maxeval
 ###NVT (0) or NPT (1) set
@@ -119,6 +119,18 @@ pair_coeff * *
 #----------------------------------------------
 neighbor 1 bin 
 neigh_modify delay 10 every 5 check yes one 5000
+#-----------------------use setforce to relax the structure initially-----------------------
+min_style cg
+fix freeze_atoms all setforce 0.0 0.0 0.0
+fix 5 all box/relax $lmp_hr->{box_relax}
+min_style	     cg
+thermo 100
+thermo_style custom step temp density lx ly lz press pxx pyy pzz pe
+#dump 1 all custom $lmp_hr->{out_freq} MIN_*.cfg id type x y z xu yu zu
+minimize $lmp_hr->{min_value}
+unfix 5
+unfix freeze_atoms
+
 #-----------------minimize---------------------
 min_style cg
 fix 5 all box/relax $lmp_hr->{box_relax}
@@ -157,7 +169,19 @@ velocity all scale $lmp_hr->{temperatur_initial}
 if " \${ensemble} == 0 " then &
 "fix 1 all nvt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp}" &
 else &
-"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} z 0.0 0.0 $lmp_hr->{pdamp}"
+"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} &
+tri $lmp_hr->{press} $lmp_hr->{press} $lmp_hr->{pdamp}" #3D
+
+
+#"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} &
+#x $lmp_hr->{press} $lmp_hr->{press} $lmp_hr->{pdamp} &
+#y $lmp_hr->{press} $lmp_hr->{press} $lmp_hr->{pdamp} &
+#xy 0 0 $lmp_hr->{pdamp}" #2D
+#
+#"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} &
+#tri $lmp_hr->{press} $lmp_hr->{press} $lmp_hr->{pdamp}" #3D
+
+#"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} z 0.0 0.0 $lmp_hr->{pdamp}"
 #"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} iso $lmp_hr->{press} $lmp_hr->{press} $lmp_hr->{pdamp} xy 0.0 0.0 $lmp_hr->{pdamp} xz 0.0 0.0 $lmp_hr->{pdamp} yz 0.0 0.0 $lmp_hr->{pdamp}"
 
 thermo 100
