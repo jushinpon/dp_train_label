@@ -18,7 +18,7 @@ chdir("..");
 my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath"); 
 
-my $sou_dir = "$currentPath/thermo_label";#source dir
+my $sou_dir = "$currentPath/scale_label";#source dir
 my $submitJobs = "no";
 my %sbatch_para = (
             nodes => 1,#how many nodes for your lmp job
@@ -53,7 +53,7 @@ my $here_doc =<<"END_MESSAGE";
 #SBATCH --job-name=label_$basename
 #SBATCH --nodes=$sbatch_para{nodes}
 #SBATCH --partition=$sbatch_para{partition}
-##SBATCH --reservation=script_test
+#SBATCH --reservation=script_test
 hostname
 rm -rf *.cfg
 rm -rf *.data

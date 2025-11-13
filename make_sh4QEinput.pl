@@ -29,7 +29,7 @@ my $pm = Parallel::ForkManager->new("$forkNo");
 #for your sh file
 my %sbatch_para = (
             nodes => 1,#how many nodes for your qe job
-            threads => '$(nproc)',#1,#modify it to 2, 4 if oom problem appears            
+            threads => 1,#'$(nproc)',#1,#modify it to 2, 4 if oom problem appears            
             partition => "All",#which partition you want to use
             runPath => "/opt/thermoPW-7-2_intel/bin/pw.x", #qe executable          
             );
@@ -64,11 +64,12 @@ my $here_doc =<<"END_MESSAGE";
 #SBATCH --job-name=$basename
 #SBATCH --nodes=$sbatch_para{nodes}
 #SBATCH --partition=$sbatch_para{partition}
+#SBATCH --reservation=script_test
 ##SBATCH --ntasks-per-node=12
 ##SBATCH --exclude=node23
 ##SBATCH --nodelist=master
 hostname
-#source /opt/intel/oneapi/setvars.sh
+source /opt/intel/oneapi/setvars.sh
 rm -rf pwscf*
 node=$sbatch_para{nodes}
 threads=$sbatch_para{threads}

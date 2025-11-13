@@ -50,7 +50,7 @@ for my $cfg (@pathOfAllcfgs){
     $counter++;
     my $basename = `basename $cfg`;
     $basename =~ s/^\s+|\s+$//g; 
-
+#print "***No $counter: $cfg\n";
     my $dirname = `dirname $cfg`;
     $dirname =~ s/^\s+|\s+$//g; 
     $basename =~ s/\.cfg//g; 

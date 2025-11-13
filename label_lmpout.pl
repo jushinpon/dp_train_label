@@ -18,9 +18,9 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 ###settings here!
-my $max4relabel = 30;# how many cfgs you want to use in labelled folder
+my $max4relabel = 100;# how many cfgs you want to use in labelled folder
 my $lowerbound = 0.05;#below which not lebelled
-my $upperbound = 0.25;#above which not lebelled
+my $upperbound = 0.5;#above which not lebelled
 my $sour_folder = "$currentPath/thermo_label";
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
