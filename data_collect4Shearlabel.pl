@@ -29,7 +29,7 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 #######pick what you want for the label process
-my @datafiles = `find -L ../dp_train_new/initial -type f -name "*.data"|grep Sn12Pb20Te32-T300-P0.data`;#|grep -v 111|grep -v 110|grep -v 100`;#find all data files
+my @datafiles = `find -L ../dp_train_new/initial -type f -name "*.data"|grep -v dimer|grep -v scale|grep -v _mp`;#|grep -v 111|grep -v 110|grep -v 100`;#find all data files
 map { s/^\s+|\s+$//g; } @datafiles;
 die "No data files to collect!\n" unless(@datafiles);
 
