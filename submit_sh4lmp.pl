@@ -17,7 +17,8 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath"); 
 
 ######### modify the sou_dir to the correct one (thermo_label, sfe_label, surf_label)
-my $sou_dir = "$currentPath/scale_label";#source dir
+#my $sou_dir = "$currentPath/scale_label";#source dir
+my $sou_dir = "$currentPath/shear_label";#source dir
 #my $sou_dir = "$currentPath/thermo_label";#source dir
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
