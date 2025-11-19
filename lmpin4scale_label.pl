@@ -28,8 +28,8 @@ my @pressure = ("0");#10000 in lammps for 1 Gpa
 #my $tdamp = $timestep*100;
 #my $pdamp = $timestep*1000;
 my $out_freq = 1;#dlp md.out frequency
-my $min_scale = 0.95;#for box length scaling of compression
-my $max_scale = 1.05;#for box length scaling of expansion
+my $min_scale = 0.92;#for box length scaling of compression
+my $max_scale = 1.08;#for box length scaling of expansion
 my $loop = 21; #total loop from compression to expansion
 ###minimize set
 

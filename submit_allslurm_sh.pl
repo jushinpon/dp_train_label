@@ -20,7 +20,8 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 ########## source folder you need to assign
-my $sou_dir = "$currentPath/thermo_label/*/labelled";#source dir with labelled subfolders
+my $sou_dir = "$currentPath/shear_label/*/labelled";#source dir with labelled subfolders
+#my $sou_dir = "$currentPath/thermo_label/*/labelled";#source dir with labelled subfolders
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
 my $pm = Parallel::ForkManager->new("$forkNo");

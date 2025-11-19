@@ -21,9 +21,11 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 ########## source folder you need to assign
-my $sou_dir = "$currentPath/thermo_label";#source dir with labelled subfolders
+my $sou_dir = "$currentPath/shear_label";#source dir with labelled subfolders
+my $data_dir = "$currentPath/data4shear";#the prefix of data file is used to find the corresponding folder in $QEin_template_dir.
+#my $sou_dir = "$currentPath/thermo_label";#source dir with labelled subfolders
+#my $data_dir = "$currentPath/data4thermo";#the prefix of data file is used to find the corresponding folder in $QEin_template_dir.
 my $QEin_template_dir = "$mainPath/dp_train_new/initial";#the folders to find the QE input file for using the same setting.
-my $data_dir = "$currentPath/data4thermo";#the prefix of data file is used to find the corresponding folder in $QEin_template_dir.
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
 my $pm = Parallel::ForkManager->new("$forkNo");
@@ -33,14 +35,13 @@ my @labelled_dir = `find $sou_dir -type d -name "labelled" -exec readlink -f {} 
 map { s/^\s+|\s+$//g; } @labelled_dir;
 my @pathOfAllcfgs;
 for my $dir (@labelled_dir){
-    #print "$dir\n";
+    print "$dir\n";
     my @cfgs = <$dir/*.cfg>;
     map { s/^\s+|\s+$//g; } @cfgs;
     for my $c (sort @cfgs){
         push @pathOfAllcfgs,$c;
     }
 }#  
-
 my $labelledNo = @pathOfAllcfgs;
 print "***all labelled cfg Number: $labelledNo.\n";
 

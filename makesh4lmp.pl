@@ -55,7 +55,7 @@ my $here_doc =<<"END_MESSAGE";
 #SBATCH --job-name=label_$basename
 #SBATCH --nodes=$sbatch_para{nodes}
 #SBATCH --partition=$sbatch_para{partition}
-##SBATCH --reservation=script_test
+#SBATCH --reservation=script_test
 hostname
 rm -rf *.cfg
 rm -rf *.data

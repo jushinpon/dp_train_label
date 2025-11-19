@@ -20,8 +20,8 @@ chdir("$currentPath");
 my @datafile = `find $currentPath/data4thermo -name "*.data"|grep -v 2d`;#find all data files
 map { s/^\s+|\s+$//g; } @datafile;
 
-my $temperatur_initial = 300;
-my $temperatur_end = 1000;
+my $temperatur_initial = 1;
+my $temperatur_end = 50;
 my @pressure = ("0");#10000 in lammps for 1 Gpa
 my $run_step = 500000;
 my $timestep = 0.001;

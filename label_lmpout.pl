@@ -18,10 +18,11 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 ###settings here!
-my $max4relabel = 100;# how many cfgs you want to use in labelled folder
-my $lowerbound = 0.05;#below which not lebelled
-my $upperbound = 0.5;#above which not lebelled
-my $sour_folder = "$currentPath/thermo_label";
+my $max4relabel = 100;# how many cfgs you want to use in a labelled folder
+my $lowerbound = 0.03;#below which not lebelled
+my $upperbound = 0.3;#above which not lebelled
+my $sour_folder = "$currentPath/shear_label";
+#my $sour_folder = "$currentPath/thermo_label";
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
 my $pm = Parallel::ForkManager->new("$forkNo");
@@ -33,6 +34,8 @@ my $ng_count = 0;
 `rm -f $sour_folder/nolabel.dat`;
 `touch $sour_folder/nolabel.dat`;
 for my $n (@all_subfolders){#loop over folders with no labelled sub folder
+    `rm -rf $n/labelled`;
+    
     unless (-e "$n/md.out"){
         #print "no md.out in $n. Skipped!\n";
        `echo "no md.out in $n" >> $sour_folder/nolabel.dat`;
@@ -65,7 +68,7 @@ for my $n (@all_subfolders){#loop over folders with no labelled sub folder
     #map { s/^\s+|\s+$//g; } @step;        
     #my @maxsort = sort {$a <=> $b} @maxf;
    # my $max4relabel
-    `rm -rf $n/labelled`;
+    
     `mkdir $n/labelled`;
     ####begin relabelling
     my $counter = 0;

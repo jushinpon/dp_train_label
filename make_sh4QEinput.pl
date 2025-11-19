@@ -21,7 +21,8 @@ chdir("$currentPath");
 
 ########## source folder you need to assign
 #my $sou_dir = "$currentPath/thermo_label/C_AlPNT-T0260-lmpT50to1250-P0-R500000/labelled";#source dir with labelled subfolders
-my $sou_dir = "$currentPath/thermo_label/*/labelled";#source dir with labelled subfolders
+my $sou_dir = "$currentPath/shear_label/*/labelled";#source dir with labelled subfolders
+#my $sou_dir = "$currentPath/thermo_label/*/labelled";#source dir with labelled subfolders
 
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
