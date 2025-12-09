@@ -19,8 +19,9 @@ chdir("$currentPath");
 
 ###settings here!
 my $max4relabel = 100;# how many cfgs you want to use in a labelled folder
-my $lowerbound = 0.03;#below which not lebelled
-my $upperbound = 0.3;#above which not lebelled
+my $lowerbound = 0.05;#below which not lebelled
+my $upperbound = 0.5;#above which not lebelled
+#my $sour_folder = "$currentPath/scale_label";
 my $sour_folder = "$currentPath/shear_label";
 #my $sour_folder = "$currentPath/thermo_label";
 

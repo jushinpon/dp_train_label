@@ -15,8 +15,8 @@ my $currentPath = getcwd();# dir for all scripts
 #my $source_folder = "$currentPath/QE_trimmed4relax";#for vc-md
 
 ########## source folder you need to assign
-my $source_folder = "$currentPath/shear_label/*/labelled";#for vc-relax
-#my $source_folder = "$currentPath/thermo_label/*/labelled";#for vc-relax
+#my $source_folder = "$currentPath/scale_label/*/labelled";#for vc-relax
+my $source_folder = "$currentPath/thermo_label/*/labelled";#for vc-relax
 
 
 my @all_QEin = `find $source_folder -type f -name "*.in"`;#keep element info`;

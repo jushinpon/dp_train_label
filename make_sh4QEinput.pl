@@ -20,9 +20,11 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 ########## source folder you need to assign
-#my $sou_dir = "$currentPath/thermo_label/C_AlPNT-T0260-lmpT50to1250-P0-R500000/labelled";#source dir with labelled subfolders
-my $sou_dir = "$currentPath/shear_label/*/labelled";#source dir with labelled subfolders
 #my $sou_dir = "$currentPath/thermo_label/*/labelled";#source dir with labelled subfolders
+#my $sou_dir = "$currentPath/thermo_label/C_AlPNT-T0260-lmpT50to1250-P0-R500000/labelled";#source dir with labelled subfolders
+#my $sou_dir = "$currentPath/scale_label/*/labelled";#source dir with labelled subfolders
+#my $sou_dir = "$currentPath/shear_label/*/labelled";#source dir with labelled subfolders
+my $sou_dir = "$currentPath/thermo_label/*/labelled";#source dir with labelled subfolders
 
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
@@ -40,13 +42,13 @@ my %sbatch_para = (
 #my $maxDFTfiles = 30;
 
 #you may use relabel script to increase more labelled folders if needed
-my @oldsh = `find $sou_dir -type f -name "*.sh" -exec readlink -f {} \\;|sort|grep -v "C_AlPNT-T0260-lmpT50to1250-P0-R500000"`;
+my @oldsh = `find $sou_dir -type f -name "*.sh" -exec readlink -f {} \\;|sort`;
 for my $i (@oldsh){`rm -f $i`;}
 
-my @oldsout = `find $sou_dir -type f -name "*.sout" -exec readlink -f {} \\;|sort|grep -v "C_AlPNT-T0260-lmpT50to1250-P0-R500000"`;
+my @oldsout = `find $sou_dir -type f -name "*.sout" -exec readlink -f {} \\;|sort`;
 for my $i (@oldsout){`rm -f $i`;}
 
-my @allQEin = `find $sou_dir -type f -name "*.in" -exec readlink -f {} \\;|sort|grep -v "C_AlPNT-T0260-lmpT50to1250-P0-R500000"`;
+my @allQEin = `find $sou_dir -type f -name "*.in" -exec readlink -f {} \\;|sort`;
 map { s/^\s+|\s+$//g; } @allQEin;
 print "***all QE input Number: ",scalar @allQEin,"\n";
 #my @pathOfAllcfgs;
@@ -65,16 +67,17 @@ my $here_doc =<<"END_MESSAGE";
 #SBATCH --job-name=$basename
 #SBATCH --nodes=$sbatch_para{nodes}
 #SBATCH --partition=$sbatch_para{partition}
-#SBATCH --reservation=script_test
+##SBATCH --reservation=script_test
 ##SBATCH --ntasks-per-node=12
-##SBATCH --exclude=node23
+##SBATCH --exclude=node03
 ##SBATCH --nodelist=master
 hostname
 source /opt/intel/oneapi/setvars.sh
 rm -rf pwscf*
 node=$sbatch_para{nodes}
-threads=$sbatch_para{threads}
+#threads=$sbatch_para{threads}
 processors=\$(nproc)
+threads=\$(nproc)
 np=\$((\$node*\$processors/\$threads))
 export OMP_NUM_THREADS=\$threads
 #the following two are for AMD CPU if slurm chooses for you!!
@@ -85,8 +88,8 @@ export PATH=/opt/mpich-4.0.3/bin:\$PATH
 
 /opt/mpich-4.0.3/bin/mpiexec -np \$np $sbatch_para{runPath} -in $basename.in
 rm -rf pwscf*
-perl /opt/qe_perl/QEout_analysis.pl
-perl /opt/qe_perl/QEout2data.pl
+#perl /opt/qe_perl/QEout_analysis.pl
+#perl /opt/qe_perl/QEout2data.pl
 
 END_MESSAGE
     #chomp $here_doc;

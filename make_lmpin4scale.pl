@@ -41,7 +41,7 @@ my $Potential_pb = join (" ",@pb_files);
 
 my $Potential_prod="$Potential_pb out_file md.out out_freq $out_freq";
 #for surface $box_relax,should be modified
-my $box_relax = "iso 0.0 nreset 50";#"aniso 200.0";#"x 200 y 200 z 200";#"aniso 0.0"; # a little compressed to get some compressed structures
+my $box_relax = "aniso 0.0 nreset 50";#"aniso 200.0";#"x 200 y 200 z 200";#"aniso 0.0"; # a little compressed to get some compressed structures
 my $min_value = "0.0 0.0 50000 100000"; #etol ftol maxiter maxeval
 ###NVT (0) or NPT (1) set
 #my $ensemble = "1" ; # If the ensemble is npt or nvt. Set according to your own needs.

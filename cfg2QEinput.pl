@@ -21,10 +21,12 @@ my $mainPath = getcwd();# main path of Perl4dpgen dir
 chdir("$currentPath");
 
 ########## source folder you need to assign
-my $sou_dir = "$currentPath/shear_label";#source dir with labelled subfolders
-my $data_dir = "$currentPath/data4shear";#the prefix of data file is used to find the corresponding folder in $QEin_template_dir.
-#my $sou_dir = "$currentPath/thermo_label";#source dir with labelled subfolders
-#my $data_dir = "$currentPath/data4thermo";#the prefix of data file is used to find the corresponding folder in $QEin_template_dir.
+#my $sou_dir = "$currentPath/scale_label";#source dir with labelled subfolders
+#my $sou_dir = "$currentPath/shear_label";#source dir with labelled subfolders
+#my $data_dir = "$currentPath/data4scale";#the prefix of data file is used to find the corresponding folder in $QEin_template_dir.
+#my $data_dir = "$currentPath/data4shear";#the prefix of data file is used to find the corresponding folder in $QEin_template_dir.
+my $sou_dir = "$currentPath/thermo_label";#source dir with labelled subfolders
+my $data_dir = "$currentPath/data4thermo";#the prefix of data file is used to find the corresponding folder in $QEin_template_dir.
 my $QEin_template_dir = "$mainPath/dp_train_new/initial";#the folders to find the QE input file for using the same setting.
 
 my $forkNo = 1;#although we don't have so many cores, only for submitting jobs into slurm
