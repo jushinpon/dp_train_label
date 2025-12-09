@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#rm -rf /home/jsp/SnPbTe_alloys/dp_train_new/initial/def-*   ---> be very careful when using this command
+#cp -r def-* /home/jsp/SnPbTe_alloys/dp_train_new/initial/
+
 use strict;
 use warnings;
 use List::Util qw(shuffle);
@@ -6,7 +9,6 @@ use File::Basename;
 use Cwd 'abs_path';
 
 # --- User Settings ---
-# Please provide the absolute path to your source files here
 my $data_sour = "/home/jsp/SnPbTe_alloys/dp_train_new/initial/Sn15Pb17Te32-T300-P0/Sn15Pb17Te32-T300-P0.data";
 my $QEinput_source = "/home/jsp/SnPbTe_alloys/dp_train_new/initial/Sn15Pb17Te32-T300-P0/Sn15Pb17Te32-T300-P0.in";
 
@@ -15,8 +17,6 @@ my @delete_num     = (1, 1, 1, 2);              # Corresponding number to be del
 
 # --- Main Processing ---
 
-# Resolve absolute paths to ensure we can find files from anywhere
-# This handles cases where you might use relative paths like ../file.data
 my $abs_data_sour = abs_path($data_sour);
 my $abs_qe_source = abs_path($QEinput_source);
 
@@ -24,8 +24,6 @@ unless (-e $abs_data_sour && -e $abs_qe_source) {
     die "Error: One or more input files not found:\nData: $data_sour\nQE: $QEinput_source\n";
 }
 
-# Parse base filename for naming the new folders
-# e.g., /path/to/Sn15Pb17Te32-T300-P0.data -> Sn15Pb17Te32-T300-P0
 my ($base_name, $dir, $suffix) = fileparse($abs_data_sour, qr/\.[^.]*/);
 
 print "Processing base case: $base_name\n";
@@ -46,34 +44,30 @@ for (my $i = 0; $i < scalar(@delete_element); $i++) {
     my $elem = $delete_element[$i];
     my $num  = $delete_num[$i];
     
-    # Construct folder name prefix (e.g., def-Sn1)
     my $prefix = "def-${elem}${num}";
     my $folder_name = "${prefix}-${base_name}";
     
-    # Define absolute path for the new folder (created in the current working directory)
     my $current_dir = `pwd`;
     chomp($current_dir);
     my $target_dir = "$current_dir/$folder_name";
     
-    print "\n--- Case $i: Creating $target_dir ---\n";
+    print "\n======================================================\n";
+    print "Task $i: Deleting $num atom(s) of element '$elem'\n";
+    print "Output Directory: $target_dir\n";
 
-    # --- Use Shell Command to Create Directory ---
     if (-d $target_dir) {
-        `rm -rf "$target_dir"`; # Clean existing folder
+        `rm -rf "$target_dir"`; 
     }
     `mkdir -p "$target_dir"`;
 
-    # Identify Atom Type ID for the element (e.g., Sn -> 1)
     my $type_id = $lammps_info{element_map}{$elem};
     unless (defined $type_id) {
         warn "Warning: Element '$elem' not found in LAMMPS Masses. Skipping.\n";
         next;
     }
 
-    # Find candidates
     my @candidate_indices;
     for (my $idx = 0; $idx < $lammps_info{total_atoms}; $idx++) {
-        # lammps_atoms: [id, type, x, y, z, line_content]
         if ($lammps_info{atoms}[$idx]->[1] == $type_id) {
             push @candidate_indices, $idx;
         }
@@ -84,11 +78,25 @@ for (my $i = 0; $i < scalar(@delete_element); $i++) {
         next;
     }
 
-    # Randomly select atoms to delete
     my @shuffled = shuffle(@candidate_indices);
     my @to_delete = @shuffled[0 .. $num-1];
     
-    # Hash for fast lookup of deleted indices
+    # --- PRINT DELETED ATOM INFO ---
+    print "------------------------------------------------------\n";
+    print "Deleted Atoms Information:\n";
+    foreach my $idx (@to_delete) {
+        my $l_id   = $lammps_info{atoms}[$idx]->[0];
+        my $l_type = $lammps_info{atoms}[$idx]->[1];
+        my $q_line = $qe_info{atom_lines}[$idx];
+        chomp($q_line);
+        
+        # Trim leading whitespace for cleaner output
+        $q_line =~ s/^\s+//;
+
+        printf "  [Index %3d] LAMMPS: ID=%-4d Type=%-2d | QE: %s\n", $idx, $l_id, $l_type, $q_line;
+    }
+    print "------------------------------------------------------\n";
+
     my %deleted_lookup = map { $_ => 1 } @to_delete;
 
     # --- Write New Files ---
@@ -98,7 +106,6 @@ for (my $i = 0; $i < scalar(@delete_element); $i++) {
     # 1. Write LAMMPS Data
     open(my $fh_d, '>', $out_data) or die "Cannot write $out_data: $!";
     
-    # Adjust header atom count
     my $new_total = $lammps_info{total_atoms} - $num;
     foreach my $line (@{$lammps_info{header}}) {
         if ($line =~ /(\d+)\s+atoms/) {
@@ -108,13 +115,11 @@ for (my $i = 0; $i < scalar(@delete_element); $i++) {
         }
     }
     
-    # Write atoms with renumbered IDs
     my $new_id = 1;
     for (my $idx = 0; $idx < $lammps_info{total_atoms}; $idx++) {
-        next if $deleted_lookup{$idx}; # Skip deleted
+        next if $deleted_lookup{$idx}; 
 
         my $line = $lammps_info{atoms}[$idx]->[5];
-        # Replace the old ID (first number) with the new continuous ID
         $line =~ s/^\s*(\d+)/$new_id/;
         print $fh_d $line;
         $new_id++;
@@ -124,7 +129,6 @@ for (my $i = 0; $i < scalar(@delete_element); $i++) {
     # 2. Write QE Input
     open(my $fh_q, '>', $out_qe) or die "Cannot write $out_qe: $!";
     
-    # Write Pre-Atoms part (update nat)
     foreach my $line (@{$qe_info{pre_atoms}}) {
         if ($line =~ /nat\s*=\s*\d+/) {
             $line =~ s/nat\s*=\s*\d+/nat = $new_total/;
@@ -132,23 +136,20 @@ for (my $i = 0; $i < scalar(@delete_element); $i++) {
         print $fh_q $line;
     }
     
-    # Write Atoms (skip deleted)
     for (my $idx = 0; $idx < $qe_info{total_atoms}; $idx++) {
         next if $deleted_lookup{$idx};
         print $fh_q $qe_info{atom_lines}[$idx];
     }
     
-    # Write Post-Atoms part
     print $fh_q $_ for @{$qe_info{post_atoms}};
     close $fh_q;
 
-    print "Created: $out_data\n";
-    print "Created: $out_qe\n";
+    print "Files created successfully.\n";
 }
 
-print "\nDone.\n";
+print "\nAll tasks completed.\n";
 
-# --- Subroutines for Parsing ---
+# --- Subroutines ---
 
 sub read_lammps_data {
     my ($file) = @_;
@@ -176,15 +177,17 @@ sub read_lammps_data {
             push @header, $line;
         } elsif ($section eq "masses") {
             push @header, $line;
-            # Parse "1 118.71 # Sn" to map Sn -> 1
             if ($line =~ /^\s*(\d+).+#\s*(\w+)/) { $elem_map{$2} = $1; }
         } elsif ($section eq "atoms_pre") {
+            # Check for data start before pushing to header
+            if ($line =~ /^\s*\d+/) { 
+                $section = "atoms_body"; 
+                redo; 
+            }
             push @header, $line;
-            # Detect start of atom data
-            if ($line =~ /^\s*\d+/) { $section = "atoms_body"; redo; }
         } elsif ($section eq "atoms_body") {
-            # ID Type X Y Z
             if ($line =~ /^\s*(\d+)\s+(\d+)\s+([-\d\.]+)\s+([-\d\.]+)\s+([-\d\.]+)/) {
+                # Store ID ($1) and Type ($2) explicitly for printing later
                 push @atoms, [$1, $2, $3, $4, $5, $line];
             }
         }
@@ -210,12 +213,11 @@ sub read_qe_input {
             push @pre, $line;
             if ($line =~ /ATOMIC_POSITIONS/) { $section = "atoms"; }
         } elsif ($section eq "atoms") {
-            # End of atoms block if we see new keywords or slashes
             if ($line =~ /K_POINTS|CELL_PARAMETERS|ATOMIC_SPECIES|^\s*[\&\/]/) {
                 $section = "post";
                 push @post, $line;
             } else {
-                if ($line =~ /\w/) { push @atoms, $line; } # Skip empty lines
+                if ($line =~ /\w/) { push @atoms, $line; } 
             }
         } else {
             push @post, $line;
